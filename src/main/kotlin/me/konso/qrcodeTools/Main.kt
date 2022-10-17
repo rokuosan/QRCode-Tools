@@ -1,5 +1,7 @@
 package me.konso.qrcodeTools
 
-fun main(){
+import me.konso.qrcodeTools.window.MainWindow
 
+fun main(){
+    MainWindow()
 }
