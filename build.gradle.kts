@@ -28,6 +28,7 @@ dependencies {
 
     // Webcam
     implementation("com.github.sarxos:webcam-capture:0.3.12")
+    implementation("org.slf4j:slf4j-log4j12:2.0.3")
 
     testImplementation(kotlin("test"))
 }
