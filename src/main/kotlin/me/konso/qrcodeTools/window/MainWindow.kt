@@ -10,7 +10,8 @@ class MainWindow: JFrame(), ActionListener {
 
     private val openReaderButton = JButton("Open Reader")
     private val openGeneratorButton = JButton("Open Generator")
-
+    private val readerWindow = ReaderWindow()
+    
     init {
         this.layout = FlowLayout()
         this.title = "QRCode Tools"
@@ -31,9 +32,7 @@ class MainWindow: JFrame(), ActionListener {
         if(e == null) return
         when(e.source) {
             this.openGeneratorButton -> GeneratorWindow()
-            this.openReaderButton -> {
-
-            }
+            this.openReaderButton -> readerWindow.display()
         }
     }
 
