@@ -15,7 +15,7 @@ class MainWindow: JFrame(), ActionListener {
         this.layout = FlowLayout()
         this.title = "QRCode Tools"
         this.defaultCloseOperation = EXIT_ON_CLOSE
-        this.setLocation(200, 200)
+        this.setLocation(100, 100)
 
         openReaderButton.addActionListener(this)
         openGeneratorButton.addActionListener(this)
@@ -30,9 +30,7 @@ class MainWindow: JFrame(), ActionListener {
     override fun actionPerformed(e: ActionEvent?) {
         if(e == null) return
         when(e.source) {
-            this.openGeneratorButton -> {
-
-            }
+            this.openGeneratorButton -> GeneratorWindow()
             this.openReaderButton -> {
 
             }
