@@ -22,7 +22,7 @@ class GeneratorWindow: JFrame(), ActionListener {
     init {
         this.layout = FlowLayout()
         this.title = "QRCode Generator"
-        this.setLocationRelativeTo(null)
+        this.setLocation( 150 ,200)
 
         // Controller
         val container = JPanel()
