@@ -5,6 +5,11 @@ import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import java.awt.image.BufferedImage
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import javax.imageio.ImageIO
 import javax.swing.ImageIcon
 import javax.swing.JButton
 import javax.swing.JFrame
@@ -18,6 +23,8 @@ class GeneratorWindow: JFrame(), ActionListener {
     private val saveButton = JButton("Save this image")
     private val outputImagePanel = JLabel()
     private val inputArea = JTextArea()
+
+    private var image: BufferedImage? = null
 
     init {
         this.layout = FlowLayout()
@@ -53,9 +60,28 @@ class GeneratorWindow: JFrame(), ActionListener {
 
     private fun updateQRCode(){
         try{
-            val image = Generator().makeQRCode(inputArea.text)
+            image = Generator().makeQRCode(inputArea.text)
             this.outputImagePanel.icon = ImageIcon(image)
         }catch(e: Exception){
+            e.printStackTrace()
+        }
+    }
+
+    private fun saveImage(image: BufferedImage?){
+        image?:return
+
+        try{
+            // 存在しないファイル名を取る
+            var tag = 0
+            while(true){
+                if(!Files.exists(Paths.get("code-$tag.png"))) break
+                tag++
+            }
+
+            // 出力
+            ImageIO.write(image, "png", File("code-$tag.png"))
+            println("[IMAGE] Save code-$tag.png (${inputArea.text})")
+        }catch (e: Exception){
             e.printStackTrace()
         }
     }
@@ -65,9 +91,7 @@ class GeneratorWindow: JFrame(), ActionListener {
 
         when(e.source){
             this.generateButton -> this.updateQRCode()
-            this.saveButton -> {
-
-            }
+            this.saveButton -> this.saveImage(image)
         }
     }
 }
