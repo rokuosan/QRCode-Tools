@@ -3,10 +3,7 @@ package me.konso.qrcodeTools.window
 import com.github.sarxos.webcam.Webcam
 import com.github.sarxos.webcam.WebcamPanel
 import com.github.sarxos.webcam.WebcamResolution
-import com.google.zxing.BinaryBitmap
-import com.google.zxing.MultiFormatReader
-import com.google.zxing.client.j2se.BufferedImageLuminanceSource
-import com.google.zxing.common.HybridBinarizer
+import me.konso.qrcodeTools.qrcode.Reader
 import java.awt.FlowLayout
 import java.util.concurrent.Executors
 import java.util.concurrent.ThreadFactory
@@ -61,18 +58,10 @@ class ReaderWindow: JFrame(), Runnable, ThreadFactory {
             if(!camera.isOpen) continue
 
             // Read QR code
-            val image = camera.image ?: continue
-            val src = BufferedImageLuminanceSource(image)
-            val bitmap = BinaryBitmap(HybridBinarizer(src))
-
-            val result =try{
-                MultiFormatReader().decode(bitmap)
-            }catch(e: Exception){
-                null
-            } ?: continue
+            val message = Reader(camera).read()?:continue
 
             // Display
-            resultArea.text = result.text
+            resultArea.text = message
         }
     }
 
