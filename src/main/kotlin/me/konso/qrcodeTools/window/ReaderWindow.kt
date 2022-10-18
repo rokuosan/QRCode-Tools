@@ -21,6 +21,7 @@ class ReaderWindow: JFrame(), Runnable, ThreadFactory {
         // JFrame Setting
         this.layout = FlowLayout()
         this.title = "QRCode Reader"
+        this.isResizable = false
         this.setLocation(140, 200)
 
         // Get webcam resolution

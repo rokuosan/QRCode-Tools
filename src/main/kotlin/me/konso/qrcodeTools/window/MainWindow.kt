@@ -15,6 +15,7 @@ class MainWindow: JFrame(), ActionListener {
     init {
         this.layout = FlowLayout()
         this.title = "QRCode Tools"
+        this.isResizable = false
         this.defaultCloseOperation = EXIT_ON_CLOSE
         this.setLocation(100, 100)
 
