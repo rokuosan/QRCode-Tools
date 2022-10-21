@@ -60,7 +60,7 @@ class GeneratorWindow: JFrame(), ActionListener {
 
     private fun updateQRCode(){
         try{
-            image = Generator().makeQRCode(inputArea.text)
+            image = Generator.makeQRCode(inputArea.text)
             this.outputImagePanel.icon = ImageIcon(image)
         }catch(e: Exception){
             e.printStackTrace()
