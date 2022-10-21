@@ -16,7 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import me.konso.qrcodeTools.window.CaptureWindow
 import me.konso.qrcodeTools.window.GeneratorWindow
+import me.konso.qrcodeTools.window.ReaderWindow
 
 fun main() = application{
     Window(
@@ -39,8 +41,8 @@ fun main() = application{
 
                 val buttons: Map<String, ()-> Unit> = mapOf(
                     Store.OPEN_GENERATOR to { GeneratorWindow() },
-                    Store.OPEN_CAMERA to { println("camera") },
-                    Store.OPEN_CAPTURE to { println("capture") }
+                    Store.OPEN_CAMERA to { ReaderWindow().display() },
+                    Store.OPEN_CAPTURE to { CaptureWindow().display() }
                 )
 
                 for(b in buttons){
