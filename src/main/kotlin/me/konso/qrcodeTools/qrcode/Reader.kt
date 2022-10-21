@@ -18,7 +18,9 @@ object Reader{
         return this.read(image)
     }
 
-    fun read(image: BufferedImage): String?{
+    fun read(image: BufferedImage?): String?{
+        image?:return null
+
         // Create bitmap
         val src = BufferedImageLuminanceSource(image)
         val bitmap = BinaryBitmap(HybridBinarizer(src))
