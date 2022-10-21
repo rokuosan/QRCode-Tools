@@ -59,7 +59,7 @@ class ReaderWindow: JFrame(), Runnable, ThreadFactory {
             if(!camera.isOpen) continue
 
             // Read QR code
-            val message = Reader(camera).read()?:continue
+            val message = Reader.read(camera)?:continue
 
             // Display
             resultArea.text = message
