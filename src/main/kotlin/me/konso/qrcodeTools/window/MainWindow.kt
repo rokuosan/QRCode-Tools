@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import javax.swing.JButton
 import javax.swing.JFrame
+import javax.swing.UIManager
 
 class MainWindow: JFrame(), ActionListener {
 
@@ -13,7 +14,7 @@ class MainWindow: JFrame(), ActionListener {
     private val openCaptureButton = JButton("Open Desktop Capture")
     private val captureWindow = CaptureWindow()
     private val readerWindow = ReaderWindow()
-    
+
     init {
         this.layout = FlowLayout()
         this.title = "QRCode Tools"
@@ -28,6 +29,8 @@ class MainWindow: JFrame(), ActionListener {
         this.add(openReaderButton)
         this.add(openGeneratorButton)
         this.add(openCaptureButton)
+
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
 
         this.pack()
         this.isVisible = true
