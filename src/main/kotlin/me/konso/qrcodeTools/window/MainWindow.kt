@@ -10,6 +10,8 @@ class MainWindow: JFrame(), ActionListener {
 
     private val openReaderButton = JButton("Open Reader")
     private val openGeneratorButton = JButton("Open Generator")
+    private val openCaptureButton = JButton("Open Desktop Capture")
+    private val captureWindow = CaptureWindow()
     private val readerWindow = ReaderWindow()
     
     init {
@@ -21,9 +23,11 @@ class MainWindow: JFrame(), ActionListener {
 
         openReaderButton.addActionListener(this)
         openGeneratorButton.addActionListener(this)
+        openCaptureButton.addActionListener(this)
 
         this.add(openReaderButton)
         this.add(openGeneratorButton)
+        this.add(openCaptureButton)
 
         this.pack()
         this.isVisible = true
@@ -34,6 +38,7 @@ class MainWindow: JFrame(), ActionListener {
         when(e.source) {
             this.openGeneratorButton -> GeneratorWindow()
             this.openReaderButton -> readerWindow.display()
+            this.openCaptureButton -> captureWindow.display()
         }
     }
 
