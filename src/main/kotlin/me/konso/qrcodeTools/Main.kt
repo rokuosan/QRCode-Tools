@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import me.konso.qrcodeTools.window.CaptureWindow
@@ -24,7 +25,10 @@ fun main() = application{
     Window(
         onCloseRequest = ::exitApplication,
         title = "QRCode Tools",
-        state = rememberWindowState(width = 300.dp, height = 350.dp)
+        state = rememberWindowState(
+            width = 300.dp, height = 350.dp,
+            position = WindowPosition(Alignment.Center)
+        )
     ){
         MaterialTheme {
             TopAppBar(
