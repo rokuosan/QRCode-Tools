@@ -1,10 +1,13 @@
 package me.konso.qrcodeTools.window
 
+import me.konso.qrcodeTools.Store
 import me.konso.qrcodeTools.qrcode.Generator
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import java.awt.event.WindowEvent
+import java.awt.event.WindowListener
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
@@ -38,6 +41,7 @@ class GeneratorWindow: JFrame(), ActionListener {
         // Add EventListener
         this.generateButton.addActionListener(this)
         this.saveButton.addActionListener(this)
+        this.addWindowListener(GeneratorWindowListener())
 
         // Input
         inputArea.tabSize = 4
@@ -94,4 +98,29 @@ class GeneratorWindow: JFrame(), ActionListener {
             this.saveButton -> this.saveImage(image)
         }
     }
+}
+
+class GeneratorWindowListener: WindowListener{
+    override fun windowOpened(e: WindowEvent?) {
+    }
+
+    override fun windowClosing(e: WindowEvent?) {
+        Store.isOpenWindows[Store.OPEN_GENERATOR] = false
+    }
+
+    override fun windowClosed(e: WindowEvent?) {
+    }
+
+    override fun windowIconified(e: WindowEvent?) {
+    }
+
+    override fun windowDeiconified(e: WindowEvent?) {
+    }
+
+    override fun windowActivated(e: WindowEvent?) {
+    }
+
+    override fun windowDeactivated(e: WindowEvent?) {
+    }
+
 }
