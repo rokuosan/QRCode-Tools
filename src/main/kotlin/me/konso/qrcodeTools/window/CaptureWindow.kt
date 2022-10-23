@@ -38,6 +38,7 @@ class CaptureWindow: JFrame(){
         this.resultArea.isEditable = false
         this.resultArea.columns = 40
         this.resultArea.rows = 25
+        this.resultArea.lineWrap = true
 
         this.add(imageLabel)
         this.add(resultArea)

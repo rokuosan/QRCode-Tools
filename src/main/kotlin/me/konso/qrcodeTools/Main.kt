@@ -9,7 +9,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
@@ -24,6 +27,7 @@ import me.konso.qrcodeTools.WindowType.CAMERA
 import me.konso.qrcodeTools.WindowType.DESKTOP
 import me.konso.qrcodeTools.WindowType.GENERATOR
 import me.konso.qrcodeTools.WindowType.values
+import me.konso.qrcodeTools.window.CaptureWindow
 import me.konso.qrcodeTools.window.GeneratorWindow
 import me.konso.qrcodeTools.window.ReaderWindow
 
@@ -45,6 +49,7 @@ fun main() = application{
 fun AppWindow(app: ApplicationScope) {
     val windows=values().toList()
     val isOpen=remember { mutableStateMapOf<String, Boolean>() }
+    val captureWindow by remember{ mutableStateOf(CaptureWindow()) }
 
     // Initialize state
     for(w in windows) {
@@ -71,13 +76,19 @@ fun AppWindow(app: ApplicationScope) {
                 if(w==CAMERA) continue
 
                 Button(
-                    onClick={ isOpen[w.name]=true },
+                    onClick={
+                        isOpen[w.name]=true
+                        if(w==DESKTOP) {
+                            captureWindow.display()
+                            isOpen[w.name]=false
+                        }
+                    },
                     enabled=!isOpen[w.name]!!
                 ) {
                     Text(w.text)
                 }
 
-                if(isOpen[w.name]!!) {
+                if(isOpen[w.name]!! && w != DESKTOP) {
                     Window(
                         onCloseRequest={
                             isOpen[w.name]=false
@@ -87,7 +98,6 @@ fun AppWindow(app: ApplicationScope) {
                     ) {
                         when(w){
                             GENERATOR -> GeneratorWindow()
-                            DESKTOP -> TODO()
                             else -> {}
                         }
                     }
