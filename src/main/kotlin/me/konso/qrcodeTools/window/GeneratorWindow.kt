@@ -1,126 +1,103 @@
 package me.konso.qrcodeTools.window
 
-import me.konso.qrcodeTools.Store
-import me.konso.qrcodeTools.qrcode.Generator
-import java.awt.BorderLayout
-import java.awt.FlowLayout
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
-import java.awt.event.WindowEvent
-import java.awt.event.WindowListener
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.toPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import me.konso.qrcodeTools.qrcode.Generator.makeQRCode
 import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import javax.imageio.ImageIO
-import javax.swing.ImageIcon
-import javax.swing.JButton
-import javax.swing.JFrame
-import javax.swing.JLabel
-import javax.swing.JPanel
-import javax.swing.JTextArea
 
-class GeneratorWindow: JFrame(), ActionListener {
+@Composable
+fun GeneratorWindow(){
+    var text by remember { mutableStateOf("") }
+    var image by remember { mutableStateOf( makeQRCode("Placeholder").toPainter()) }
+    val focus = remember { FocusRequester() }
 
-    private val generateButton = JButton("Generate!")
-    private val saveButton = JButton("Save this image")
-    private val outputImagePanel = JLabel()
-    private val inputArea = JTextArea()
-
-    private var image: BufferedImage? = null
-
-    init {
-        this.layout = FlowLayout()
-        this.title = "QRCode Generator"
-        this.setLocation( 150 ,200)
-
-        // Controller
-        val container = JPanel()
-        container.layout = BorderLayout()
-
-        // Add EventListener
-        this.generateButton.addActionListener(this)
-        this.saveButton.addActionListener(this)
-        this.addWindowListener(GeneratorWindowListener())
-
-        // Input
-        inputArea.tabSize = 4
-        inputArea.columns = 30
-        inputArea.rows = 10
-        inputArea.text = "This is sample QR Code"
-        container.add(BorderLayout.NORTH, inputArea)
-        container.add(BorderLayout.WEST, generateButton)
-        container.add(BorderLayout.EAST, saveButton)
-
-        // Output Image
-        outputImagePanel.setSize(512, 512)
-        updateQRCode()
-
-        this.add(container)
-        this.add(outputImagePanel)
-        this.pack()
-        this.isVisible = true
-    }
-
-    private fun updateQRCode(){
-        try{
-            image = Generator.makeQRCode(inputArea.text)
-            this.outputImagePanel.icon = ImageIcon(image)
-        }catch(e: Exception){
-            e.printStackTrace()
+    Column{
+        TopAppBar{
+            Text("QRCode Generator")
         }
-    }
 
-    private fun saveImage(image: BufferedImage?){
-        image?:return
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = {
+                    text = it
+                    if(text.isNotEmpty()){
+                        image = makeQRCode(text).toPainter()
+                    }
+                },
+                modifier = Modifier.width(200.dp)
+                    .fillMaxHeight()
+                    .focusRequester(focus),
+                placeholder = { Text("ここにQRコードに変換したい文字列を入力してください") },
+                shape = RectangleShape,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.Transparent
+                )
+            )
 
-        try{
-            // 存在しないファイル名を取る
-            var tag = 0
-            while(true){
-                if(!Files.exists(Paths.get("code-$tag.png"))) break
-                tag++
+            LaunchedEffect(Unit){
+                focus.requestFocus()
             }
 
-            // 出力
-            ImageIO.write(image, "png", File("code-$tag.png"))
-            println("[IMAGE] Save code-$tag.png (${inputArea.text})")
-        }catch (e: Exception){
-            e.printStackTrace()
-        }
-    }
-
-    override fun actionPerformed(e: ActionEvent?) {
-        if(e == null) return
-
-        when(e.source){
-            this.generateButton -> this.updateQRCode()
-            this.saveButton -> this.saveImage(image)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ){
+                Image(
+                    image,
+                    "",
+                    contentScale = ContentScale.Fit
+                )
+            }
         }
     }
 }
 
-class GeneratorWindowListener: WindowListener{
-    override fun windowOpened(e: WindowEvent?) {
-    }
+private fun saveImage(image: BufferedImage?){
+    image?:return
 
-    override fun windowClosing(e: WindowEvent?) {
-        Store.isOpenWindows[Store.OPEN_GENERATOR] = false
-    }
+    try{
+        // 存在しないファイル名を取る
+        var tag = 0
+        while(true){
+            if(!Files.exists(Paths.get("code-$tag.png"))) break
+            tag++
+        }
 
-    override fun windowClosed(e: WindowEvent?) {
+        // 出力
+        ImageIO.write(image, "png", File("code-$tag.png"))
+    }catch (e: Exception){
+        e.printStackTrace()
     }
-
-    override fun windowIconified(e: WindowEvent?) {
-    }
-
-    override fun windowDeiconified(e: WindowEvent?) {
-    }
-
-    override fun windowActivated(e: WindowEvent?) {
-    }
-
-    override fun windowDeactivated(e: WindowEvent?) {
-    }
-
 }
