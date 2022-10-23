@@ -8,7 +8,8 @@ import com.github.sarxos.webcam.WebcamPanel
 import com.github.sarxos.webcam.WebcamResolution
 
 class AppResources(
-    val webcamPanel: WebcamPanel
+    val webcamPanel: WebcamPanel,
+    var isCapturing: Boolean
 )
 
 val LocalAppResources = compositionLocalOf<AppResources> {
@@ -26,7 +27,8 @@ fun rememberAppResources(): AppResources{
 
     return remember {
         AppResources(
-            webcamPanel = panel
+            webcamPanel = panel,
+            isCapturing = false
         )
     }
 }
