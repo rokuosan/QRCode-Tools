@@ -1,112 +1,105 @@
 package me.konso.qrcodeTools.window
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.toPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import me.konso.qrcodeTools.qrcode.Capture
 import me.konso.qrcodeTools.qrcode.Reader
-import java.awt.FlowLayout
-import java.awt.Image
-import java.awt.MediaTracker
-import java.awt.event.WindowEvent
-import java.awt.event.WindowListener
-import javax.swing.ImageIcon
-import javax.swing.JFrame
-import javax.swing.JLabel
-import javax.swing.JTextArea
-import kotlin.random.Random
 
-class CaptureWindow: JFrame(){
+@Composable
+fun CaptureWindow(isCapturing: Boolean){
+    var text by remember { mutableStateOf("") }
+    val focus = remember { FocusRequester() }
+    var image by remember { mutableStateOf(Capture.getDesktopImage()!!) }
+//    val isCapturing = LocalAppResources.current.isCapturing
 
-    // Global Variable
-    private val tracker = MediaTracker(this)
-    private val imageLabel = JLabel()
-    private lateinit var desktop: ImageIcon
-    private lateinit var small: Image
-    private val resultArea: JTextArea
-
-    // Static
-    companion object{
-        var isWindowOpen = false
-    }
-
-    // Constructor
-    init{
-        this.layout = FlowLayout()
-        this.title = "Read from Desktop"
-        this.isResizable = false
-        this.addWindowListener(CaptureWindowListener())
-
-        this.resultArea = JTextArea()
-        this.resultArea.isEditable = false
-        this.resultArea.columns = 40
-        this.resultArea.rows = 25
-        this.resultArea.lineWrap = true
-
-        this.add(imageLabel)
-        this.add(resultArea)
-    }
-
-    /**
-     * ウィンドウを表示する関数
-     *
-     */
-    fun display(){
-        isWindowOpen = true
-
-        Thread{
-            while(true){
-                if(!isWindowOpen) break
-
-                this.update()
-                this.imageLabel.repaint()
-                this.pack()
-
-                try{
-                    Thread.sleep(33)
-                }catch(e: Exception){
-                    e.printStackTrace()
-                }
+    Column {
+        TopAppBar(
+            contentPadding = PaddingValues(horizontal = 16.dp)
+        ){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text("QRCode Reader Desktop", fontWeight = FontWeight.SemiBold)
             }
-        }.start()
-
-        this.isVisible = true
-    }
-
-    private fun update(){
-        desktop = ImageIcon(Capture.getDesktopImage())
-        small = desktop.image.getScaledInstance((desktop.iconWidth * 0.4).toInt(), -1, Image.SCALE_FAST)
-
-        val r = Random.nextInt()
-        tracker.addImage(small, r)
-        tracker.waitForID(r)
-        tracker.removeImage(small, r)
-
-        imageLabel.icon = ImageIcon(small)
-
-        Reader.read(Capture.getDesktopImage())?.let {
-            resultArea.text = it
         }
-    }
-}
 
-class CaptureWindowListener: WindowListener{
-    override fun windowOpened(e: WindowEvent?) {
-    }
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ){
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.width(200.dp)
+                    .fillMaxHeight()
+                    .focusRequester(focus),
+                placeholder = { Text("ここに結果が表示されます") },
+                shape = RectangleShape,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.Gray
+                ),
+                readOnly = true
+            )
 
-    override fun windowClosing(e: WindowEvent?) {
-        CaptureWindow.isWindowOpen = false
-    }
+            LaunchedEffect(Unit){
+                focus.requestFocus()
 
-    override fun windowClosed(e: WindowEvent?) {
-    }
+                Thread{
+                    while(true){
+                        if(!isCapturing) break
 
-    override fun windowIconified(e: WindowEvent?) {
-    }
+                        image = Capture.getDesktopImage()!!
+                        text = Reader.read(image)?:text
 
-    override fun windowDeiconified(e: WindowEvent?) {
-    }
+                        try{
+                            Thread.sleep(10)
+                        }catch(e: Exception){
+                            e.printStackTrace()
+                            break
+                        }
+                    }
+                }.start()
+            }
 
-    override fun windowActivated(e: WindowEvent?) {
-    }
-
-    override fun windowDeactivated(e: WindowEvent?) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ){
+                Image(
+                    image.toPainter(),
+                    "",
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
     }
 }

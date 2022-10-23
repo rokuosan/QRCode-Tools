@@ -9,10 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
@@ -49,7 +46,7 @@ fun main() = application{
 fun AppWindow(app: ApplicationScope) {
     val windows=values().toList()
     val isOpen=remember { mutableStateMapOf<String, Boolean>() }
-    val captureWindow by remember{ mutableStateOf(CaptureWindow()) }
+    var isCapturing = LocalAppResources.current.isCapturing
 
     // Initialize state
     for(w in windows) {
@@ -78,9 +75,9 @@ fun AppWindow(app: ApplicationScope) {
                 Button(
                     onClick={
                         isOpen[w.name]=true
-                        if(w==DESKTOP) {
-                            captureWindow.display()
-                            isOpen[w.name]=false
+
+                        if(w==DESKTOP){
+                            isCapturing = true
                         }
                     },
                     enabled=!isOpen[w.name]!!
@@ -88,16 +85,21 @@ fun AppWindow(app: ApplicationScope) {
                     Text(w.text)
                 }
 
-                if(isOpen[w.name]!! && w != DESKTOP) {
+                if(isOpen[w.name]!!) {
                     Window(
                         onCloseRequest={
                             isOpen[w.name]=false
+
+                            if(w == DESKTOP){
+                                isCapturing = false
+                            }
                         },
                         title=w.title,
                         resizable=false
                     ) {
                         when(w){
                             GENERATOR -> GeneratorWindow()
+                            DESKTOP -> CaptureWindow(isCapturing)
                             else -> {}
                         }
                     }
