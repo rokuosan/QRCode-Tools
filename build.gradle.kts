@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "me.konso"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 java.sourceCompatibility = JavaVersion.VERSION_17
 java.targetCompatibility = JavaVersion.VERSION_1_8
 
