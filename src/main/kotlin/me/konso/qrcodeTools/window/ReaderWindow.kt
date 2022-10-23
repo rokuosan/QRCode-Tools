@@ -1,108 +1,118 @@
 package me.konso.qrcodeTools.window
 
-import com.github.sarxos.webcam.Webcam
-import com.github.sarxos.webcam.WebcamPanel
-import com.github.sarxos.webcam.WebcamResolution
-import me.konso.qrcodeTools.Store
-import me.konso.qrcodeTools.qrcode.Reader
-import java.awt.FlowLayout
-import java.awt.event.WindowEvent
-import java.awt.event.WindowListener
-import java.util.concurrent.Executors
-import java.util.concurrent.ThreadFactory
-import javax.swing.JFrame
-import javax.swing.JTextArea
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.SwingPanel
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import com.google.zxing.BinaryBitmap
+import com.google.zxing.DecodeHintType
+import com.google.zxing.MultiFormatReader
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource
+import com.google.zxing.common.HybridBinarizer
+import me.konso.qrcodeTools.LocalAppResources
+import java.util.*
 
-class ReaderWindow: JFrame(), Runnable, ThreadFactory {
-    private val executor = Executors.newSingleThreadExecutor(this)
+@Composable
+fun ReaderWindow(){
+    var text by remember { mutableStateOf("") }
+    val focus = remember { FocusRequester() }
+    val panel = LocalAppResources.current.webcamPanel
 
-    companion object{
-        var camera: Webcam? = null
-    }
-    private var panel: WebcamPanel
-    private val resultArea: JTextArea
 
-    init {
-        // JFrame Setting
-        this.layout = FlowLayout()
-        this.title = "QRCode Reader"
-        this.isResizable = false
-        this.setLocation(140, 200)
-        this.addWindowListener(ReaderWindowListener())
-
-        // Get webcam resolution
-        val size = WebcamResolution.VGA.size
-
-        // Select webcam
-        camera = Webcam.getWebcams().first()
-        camera?.viewSize = size
-        panel = WebcamPanel(camera)
-        panel.preferredSize = size
-        panel.isFPSDisplayed = true
-
-        // Result field
-        resultArea = JTextArea()
-        resultArea.isEditable = false
-        resultArea.preferredSize = size
-
-        this.add(panel)
-        this.add(resultArea)
-        this.pack()
-    }
-
-    fun display(){
-        this.isVisible = true
-        this.executor.execute(this)
-    }
-
-    override fun run() {
-        while(true){
-            try{
-                Thread.sleep(100)
-            }catch(e: Exception){
-                e.printStackTrace()
+    Column {
+        TopAppBar(
+            contentPadding = PaddingValues(horizontal = 16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text("QRCode Reader", fontWeight = FontWeight.SemiBold)
             }
-            if(!Store.isOpenWindows[Store.OPEN_CAMERA]!!) break
-            if(!camera?.isOpen!!) break
+        }
 
-            // Read QR code
-            val message = Reader.read(camera!!)?:continue
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ){
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                modifier = Modifier.width(200.dp)
+                    .fillMaxHeight()
+                    .focusRequester(focus),
+                placeholder = { Text("ここに結果が表示されます") },
+                shape = RectangleShape,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.Gray
+                ),
+                readOnly = true
+            )
+            LaunchedEffect(Unit){
+                focus.requestFocus()
 
-            // Display
-            resultArea.text = message
+                Thread{
+                    while(true){
+                        if(!panel.webcam.isOpen) break
+
+                        val image = panel.webcam.image
+
+                        val src = BufferedImageLuminanceSource(image)
+                        val bitmap = BinaryBitmap(HybridBinarizer(src))
+                        val hints: MutableMap<DecodeHintType, Any> = EnumMap(DecodeHintType::class.java)
+                        hints[DecodeHintType.CHARACTER_SET]=Charsets.UTF_8.displayName()
+
+                        text = try{
+                            MultiFormatReader().decode(bitmap, hints).text
+                        }catch(e: Exception){
+                            text
+                        }
+
+                        try{
+                            Thread.sleep(10)
+                        }catch(e: Exception){
+                            e.printStackTrace()
+                            break
+                        }
+                    }
+                }.start()
+            }
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ){
+
+                SwingPanel(
+                    factory = {
+                        panel
+                    }
+                )
+            }
         }
     }
-
-    override fun newThread(r: Runnable): Thread {
-        val thread = Thread(r, "QRCODE-RUNNER")
-        thread.isDaemon = true
-        return thread
-    }
-
-}
-
-class ReaderWindowListener: WindowListener{
-    override fun windowOpened(e: WindowEvent?) {
-    }
-
-    override fun windowClosing(e: WindowEvent?) {
-        Store.isOpenWindows[Store.OPEN_CAMERA] = false
-        ReaderWindow.camera?.close()
-    }
-
-    override fun windowClosed(e: WindowEvent?) {
-    }
-
-    override fun windowIconified(e: WindowEvent?) {
-    }
-
-    override fun windowDeiconified(e: WindowEvent?) {
-    }
-
-    override fun windowActivated(e: WindowEvent?) {
-    }
-
-    override fun windowDeactivated(e: WindowEvent?) {
-    }
-
 }
