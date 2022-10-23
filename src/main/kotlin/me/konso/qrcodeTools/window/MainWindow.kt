@@ -39,7 +39,7 @@ class MainWindow: JFrame(), ActionListener {
     override fun actionPerformed(e: ActionEvent?) {
         if(e == null) return
         when(e.source) {
-            this.openGeneratorButton -> GeneratorWindow()
+            this.openGeneratorButton -> TODO()
             this.openReaderButton -> readerWindow.display()
             this.openCaptureButton -> captureWindow.display()
         }
