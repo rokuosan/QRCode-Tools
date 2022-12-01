@@ -28,13 +28,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.google.zxing.BinaryBitmap
-import com.google.zxing.DecodeHintType
-import com.google.zxing.MultiFormatReader
-import com.google.zxing.client.j2se.BufferedImageLuminanceSource
-import com.google.zxing.common.HybridBinarizer
 import me.konso.qrcodeTools.LocalAppResources
-import java.util.*
+import me.konso.qrcodeTools.qrcode.Reader
 
 @Composable
 fun ReaderWindow(){
@@ -79,18 +74,7 @@ fun ReaderWindow(){
                     while(true){
                         if(!panel.webcam.isOpen) break
 
-                        val image = panel.webcam.image
-
-                        val src = BufferedImageLuminanceSource(image)
-                        val bitmap = BinaryBitmap(HybridBinarizer(src))
-                        val hints: MutableMap<DecodeHintType, Any> = EnumMap(DecodeHintType::class.java)
-                        hints[DecodeHintType.CHARACTER_SET]=Charsets.UTF_8.displayName()
-
-                        text = try{
-                            MultiFormatReader().decode(bitmap, hints).text
-                        }catch(e: Exception){
-                            text
-                        }
+                        text = Reader.read(panel.webcam)?:text
 
                         try{
                             Thread.sleep(10)
