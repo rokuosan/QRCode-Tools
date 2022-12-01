@@ -10,14 +10,13 @@ import java.awt.image.BufferedImage
 import java.util.*
 
 object Reader{
-    private lateinit var image: BufferedImage
 
     fun read(camera: Webcam): String?{
         if(!camera.isOpen) return null
 
         // Get image
-        image = camera.image?:return null
-        return this.read(image)
+        camera.image?:return null
+        return this.read(camera.image)
     }
 
     fun read(image: BufferedImage?): String?{
