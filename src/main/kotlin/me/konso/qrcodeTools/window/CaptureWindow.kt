@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.toPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.konso.qrcodeTools.qrcode.Capture
 import me.konso.qrcodeTools.qrcode.Reader
 
@@ -73,7 +75,7 @@ fun CaptureWindow(isCapturing: Boolean){
             LaunchedEffect(Unit){
                 focus.requestFocus()
 
-                Thread{
+                launch {
                     while(true){
                         if(!isCapturing) break
 
@@ -81,13 +83,13 @@ fun CaptureWindow(isCapturing: Boolean){
                         text = Reader.read(image)?:text
 
                         try{
-                            Thread.sleep(10)
+                            delay(10L)
                         }catch(e: Exception){
                             e.printStackTrace()
                             break
                         }
                     }
-                }.start()
+                }
             }
 
             Box(
